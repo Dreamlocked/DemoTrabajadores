@@ -129,7 +129,7 @@ function guardar() {
 var modificar = 0
 function editar(id) {
     modificar = id
-    fetch(`/Home/Obtener?idTrabajador=${id}`)
+    await fetch(`/Home/Obtener?idTrabajador=${id}`)
         .then(response => {
             return response.ok ? response.json() : Promise.reject(response)
         })
@@ -155,51 +155,53 @@ function editar(id) {
                     break;
                 }
             }
-           
+        })
 
-            var provincia = document.getElementById('formprovincia1');
-            provincia.disabled = false
+    var provincia = document.getElementById('formprovincia1');
 
-            fetch(`/Ubigeo/Provincia?idDepartamento=${departamento.value}`)
+    
+    provincia.disabled = false
+
+    fetch(`/Ubigeo/Provincia?idDepartamento=${departamento.value}`)
+        .then(response => {
+            return response.ok ? response.json() : Promise.reject(response)
+        })
+        .then(data => {
+            data.forEach(e => {
+                var options = provincia.options;
+                options[options.length] = new Option(e.nombreProvincia, e.idProvincia);
+            })
+
+            for (var i = 0; i < provincia.options.length + 1; i++) {
+
+                if (provincia.options[i].text === trabajador.provincia) {
+                    provincia.selectedIndex = i;
+                    break;
+                }
+            }
+            var distrito = document.getElementById('formdistrito1');
+            distrito.disabled = false
+
+            fetch(`/Ubigeo/Distrito?idProvincia=${provincia.value}`)
                 .then(response => {
                     return response.ok ? response.json() : Promise.reject(response)
                 })
                 .then(data => {
                     data.forEach(e => {
-                        var options = provincia.options;
-                        options[options.length] = new Option(e.nombreProvincia, e.idProvincia);
+                        var options = distrito.options;
+                        options[options.length] = new Option(e.nombreDistrito, e.idDistrito);
                     })
-                    console.log(provincia.options)
-                    for (var i = 0; i < provincia.options.length + 1; i++) {
-
-                        if (provincia.options[i].text === trabajador.provincia) {
-                            provincia.selectedIndex = i;
+                    console.log("asdasdasdasdasdsa")
+                    for (var i = 0; i < distrito.options.length; i++) {
+                        if (distrito.options[i].text === trabajador.distrito) {
+                            distrito.selectedIndex = i;
                             break;
                         }
                     }
-                    var distrito = document.getElementById('formdistrito1');
-                    distrito.disabled = false
-
-                    fetch(`/Ubigeo/Distrito?idProvincia=${provincia.value}`)
-                        .then(response => {
-                            return response.ok ? response.json() : Promise.reject(response)
-                        })
-                        .then(data => {
-                            data.forEach(e => {
-                                var options = distrito.options;
-                                options[options.length] = new Option(e.nombreDistrito, e.idDistrito);
-                            })
-
-                            for (var i = 0; i < distrito.options.length; i++) {
-                                if (distrito.options[i].text === trabajador.distrito) {
-                                    distrito.selectedIndex = i;
-                                    break;
-                                }
-                            }
-                        })
                 })
         })
 }
+
 
 function guardarEditado() {
     let tipoDocumento = document.getElementById("tipoDocumento1")
@@ -240,17 +242,15 @@ function guardarEditado() {
 }
 
 function getProvincias1(id) {
+    console.log("asdasdas")
     let formprovincia = document.getElementById("formprovincia1");
     let formdistrito = document.getElementById("formdistrito1");
     if (id == 0) {
         formprovincia.disabled = true
-        formdistrito.disabled = true
         formprovincia.options.length = 0;
-        formdistrito.options.length = 0;
         var options = formprovincia.options;
         formprovincia[options.length] = new Option("Seleccione una Provincia", 0);
-        var options = formdistrito.options;
-        formdistrito[options.length] = new Option("Seleccione un Distrito", 0);
+
     } else {
         formprovincia.disabled = false
         formprovincia.options.length = 1;
@@ -264,7 +264,12 @@ function getProvincias1(id) {
                     options[options.length] = new Option(e.nombreProvincia, e.idProvincia);
                 })
             })
+
     }
+    formdistrito.disabled = true
+    formdistrito.options.length = 0;
+    var options = formdistrito.options;
+    formdistrito[options.length] = new Option("Seleccione un Distrito", 0);
 }
 function getDistritos1(id) {
     let formdistrito = document.getElementById("formdistrito1");
