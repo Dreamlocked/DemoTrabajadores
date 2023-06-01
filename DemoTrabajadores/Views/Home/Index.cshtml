@@ -1,0 +1,197 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container">
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h2>Lista de Trabajadores</h2>
+        </div>
+        <div class="card-body">
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Tipo</th>
+                        <th scope="col">Numero</th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Sexo</th>
+                        <th scope="col">Distrito</th>
+                        <th scope="col">Provincia</th>
+                        <th scope="col">Departamento</th>
+                        <th scope="col"></th>
+                        <th scope="col"></th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var item in @Model.listarTrabajadoresDTO)
+                    {
+                        <tr>
+                            <th scope="row">@item.IdTrabajador</th>
+                            <td>@item.TipoDocumento</td>
+                            <td>@item.NroDocumento</td>
+                            <td>@item.Nombres</td>
+                            <td>@item.Sexo</td>
+                            <td>@item.Distrito</td>
+                            <td>@item.Provincia</td>
+                            <td>@item.Departamento</td>
+                            <td>
+                                <button type="button" class="btn py-0 btn-primary" data-bs-toggle="modal" data-bs-target="#formEditar"
+                                        onclick="editar(@item.IdTrabajador)">
+                                    <i class="fa-solid fa-user-pen"></i>
+                                </button>
+                            </td>
+                            <td><button type="button" class="btn py-0 btn-danger" onclick="eliminar(@item.IdTrabajador)"><i class="fa-solid fa-user-slash"></i></button></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer">
+            <div class="d-grid gap-2 row d-md-flex justify-content-md-end" data-bs-toggle="modal" data-bs-target="#formCrear">
+                <button class="btn btn-success me-md-3 col-lg-3 fw-bold" type="button">Registrar nuevo trabajador</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal crear-->
+<div class="modal fade" id="formCrear" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h1 class="modal-title fs-4" id="exampleModalLabel">Registrar nuevo trabajador</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="inputNombre" class="form-label fw-bold">Nombres</label>
+                    <input type="text" class="form-control" id="inputNombre" placeholder="John Doe">
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-text">
+                        <select class="form-select" aria-label="Default select example" id="tipoDocumento">
+                            <option value="1">DNI</option>
+                            <option value="2">RUC</option>
+                        </select>
+                    </div>
+                    <input type="text" class="form-control" aria-label="Text input with checkbox" placeholder="Nro de Documento" id="nroDocumento">
+                </div>
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label fw-bold me-4">Sexo</label>
+                    <div class="form-check form-check-inline mx-4">
+                        <input class="form-check-input" type="radio" name="sexo" value="M" id="rbMasculino" selected>
+                        <label class="form-check-label" for="rbMasculino" >Masculino</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="sexo" value="F" id="rbFemenino">
+                        <label class="form-check-label" for="rbFemenino" >Femenino</label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label fw-bold">Departamento</label>
+                    <select class="form-select" aria-label="Default select example" id="formdepartamento" onchange="getProvincias(this.value)">
+                        <option selected value="0">Seleccione un Departamento</option>
+                        @foreach(var item in @Model.departamentos)
+                        {
+                            <option value="@item.IdDepartamento">@item.NombreDepartamento</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label fw-bold">Provincia</label>
+                    <select class="form-select" aria-label="Default select example" disabled id="formprovincia" onchange="getDistritos(this.value)">
+                        <option selected value="0">Seleccione una Provincia</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label fw-bold">Distrito</label>
+                    <select class="form-select" aria-label="Default select example" disabled id="formdistrito">
+                        <option selected value="0">Seleccione un Distrito</option>
+                    </select>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-success" onclick="guardar()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Editar-->
+<div class="modal fade" id="formEditar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h1 class="modal-title fs-4" id="exampleModalLabel">Editar trabajador</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="inputNombre" class="form-label fw-bold">Nombres</label>
+                    <input type="text" class="form-control" id="inputNombre1" placeholder="John Doe">
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-text">
+                        <select class="form-select" aria-label="Default select example" id="tipoDocumento1">
+                            <option value="1">DNI</option>
+                            <option value="2">RUC</option>
+                        </select>
+                    </div>
+                    <input type="text" class="form-control" aria-label="Text input with checkbox" placeholder="Nro de Documento" id="nroDocumento1">
+                </div>
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label fw-bold me-4">Sexo</label>
+                    <div class="form-check form-check-inline mx-4">
+                        <input class="form-check-input" type="radio" name="sexo1" value="M" id="rbMasculino1" selected>
+                        <label class="form-check-label" for="rbMasculino1">Masculino</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="sexo1" value="F" id="rbFemenino1">
+                        <label class="form-check-label" for="rbFemenino1">Femenino</label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label fw-bold">Departamento</label>
+                    <select class="form-select" aria-label="Default select example" id="formdepartamento1" onchange="getProvincias1(this.value)">
+                        <option selected value="0">Seleccione un Departamento</option>
+                        @foreach(var item in @Model.departamentos)
+                        {
+                            <option value="@item.IdDepartamento">@item.NombreDepartamento</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label fw-bold">Provincia</label>
+                    <select class="form-select" aria-label="Default select example" disabled id="formprovincia1" onchange="getDistritos1(this.value)">
+                        <option selected value="0">Seleccione una Provincia</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label fw-bold">Distrito</label>
+                    <select class="form-select" aria-label="Default select example" disabled id="formdistrito1">
+                        <option selected value="0">Seleccione un Distrito</option>
+                    </select>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-success" onclick="guardarEditado()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script src="~/js/index.js"></script>
